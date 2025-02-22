@@ -1,21 +1,40 @@
-import { BookingForm } from "@/components/booking/BookingForm";
-import OrderSummary from "@/components/booking/OrderSummary";
-import { CancellationPolicy } from "@/components/booking/BookingForm";
-const Booking:React.FC=()=>{
-    const bookingDetails = {
-        propertyName: "Sample Property",
-        startDate: new Date().getTime(),
-        totalNights: 5,
-        bookingFee: 100,
-        price: 500
-    };
+import axios from "axios";
 
+import { useState } from "react";
+export default function BookingForm(){
+    const [formData,setFormData]=useState({
+        firstName:"",
+        lastName:"",
+        email:"",
+        phoneNumber:"",
+        cardNumber:"",
+        expirationDate:"",
+        cvv:"",
+        billingAddress:"",
+    })
+    const[loading,setLoading]=useState(false)
+    const[error,setError]=useState(null)
+const handleSubmit=async(e:React.FormEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+    setLoading(true)
+    setError(null);
+    try{
+        const response=await axios.post("/api/bookings",formData);
+        setFormData(response.data)
+       alert("Booking Confirmed")
+    } catch (error) {
+        console.error("Error response",error)
+    } finally{
+        setLoading(false)
+    }
+};
     return(
-        <div className="min-h-screen flex  w-fullflex-col ">
-            <BookingForm/>
-            <OrderSummary bookingDetails={bookingDetails}/>
-            <CancellationPolicy/>
-        </div>
+        <form onSubmit={handleSubmit}>
+            <button type="submit" disabled={loading}>
+                {loading ? "Processing" : "Confirm Payment"}
+            </button>
+            {error && <p className="text-red-500">{error}</p>}
+        </form>
+        
     )
 }
-export default Booking
